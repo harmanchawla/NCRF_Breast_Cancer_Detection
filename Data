@@ -1,0 +1,7 @@
+Dataset
+We are using Camelyon 16 dataset for this project which consists images of both normal and tumor cells.
+
+The dataset consists of training and testing. Training dataset has both normal and tumor images. The entire size of dataset 
+is around 700 GB.
+
+The link for downloading the dataset is : https://drive.google.com/drive/folders/0BzsdkU4jWx9Bb19WNndQTlUwb2M
