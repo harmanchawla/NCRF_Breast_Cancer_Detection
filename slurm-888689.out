@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "wsi/bin/train.py", line 265, in <module>
+    main()
+  File "wsi/bin/train.py", line 261, in main
+    run(args)
+  File "wsi/bin/train.py", line 221, in run
+    dataloader_normal_train)
+  File "wsi/bin/train.py", line 69, in train_epoch
+    loss = loss_fn(output, target)
+  File "/scratch/zy1129/pyenv/py3.6.3/lib/python3.6/site-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/scratch/zy1129/pyenv/py3.6.3/lib/python3.6/site-packages/torch/nn/modules/loss.py", line 595, in forward
+    reduction=self.reduction)
+  File "/scratch/zy1129/pyenv/py3.6.3/lib/python3.6/site-packages/torch/nn/functional.py", line 2077, in binary_cross_entropy_with_logits
+    return torch.binary_cross_entropy_with_logits(input, target, weight, pos_weight, reduction_enum)
+RuntimeError: expected type torch.FloatTensor but got torch.cuda.FloatTensor
