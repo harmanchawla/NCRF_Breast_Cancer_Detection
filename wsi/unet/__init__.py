@@ -1,1 +1,1 @@
-from .unet_model import UNet
+from wsi.unet.unet_model import UNet

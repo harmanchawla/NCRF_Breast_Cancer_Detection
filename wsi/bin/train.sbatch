@@ -10,4 +10,4 @@ module purge
 module load python3/intel/3.6.3
 source ../pyenv/py3.6.3/bin/activate
 
-python3 wsi/bin/train.py configs/resnet18_crf.json saved_model/
+python3 wsi/bin/train.py configs/unet_crf.json saved_model/
