@@ -3,6 +3,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH -t48:00:00
 #SBATCH --mem=40GB
+#SBATCH --mail-type=END
 #SBATCH --mail-user=zy1129@nyu.edu
 
 module purge

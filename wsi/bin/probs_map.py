@@ -14,7 +14,7 @@ from torch.autograd import Variable
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 
 torch.manual_seed(0)
-# torch.cuda.manual_seed_all(0)
+torch.cuda.manual_seed_all(0)
 
 from wsi.data.wsi_producer import GridWSIPatchDataset  # noqa
 from wsi.model import MODELS  # noqa
@@ -50,24 +50,27 @@ def get_probs_map(model, dataloader):
 
     count = 0
     time_now = time.time()
-    with torch.no_grad():
-        for (data, x_mask, y_mask) in dataloader:
-            # data = Variable(data.cuda(async=True), volatile=True)
-            data = Variable(data)
-            output = model(data)
-            # because of torch.squeeze at the end of forward in resnet.py, if the
-            # len of dim_0 (batch_size) of data is 1, then output removes this dim.
-            # should be fixed in resnet.py by specifying torch.squeeze(dim=2) later
-            if len(output.shape) == 1:
-                probs = output[idx_center].sigmoid().cpu().data.numpy().flatten()
-            else:
-                probs = output[:,idx_center].sigmoid().cpu().data.numpy().flatten()
-            probs_map[x_mask, y_mask] = probs
-            count += 1
+    for (data, x_mask, y_mask) in dataloader:
+        data = Variable(data.cuda(async=True), volatile=True)
+        output = model(data)
+        # because of torch.squeeze at the end of forward in resnet.py, if the
+        # len of dim_0 (batch_size) of data is 1, then output removes this dim.
+        # should be fixed in resnet.py by specifying torch.squeeze(dim=2) later
+        if len(output.shape) == 1:
+            probs = output[idx_center].sigmoid().cpu().data.numpy().flatten()
+        else:
+            probs = output[:,
+                           idx_center].sigmoid().cpu().data.numpy().flatten()
+        probs_map[x_mask, y_mask] = probs
+        count += 1
 
-            time_spent = time.time() - time_now
-            time_now = time.time()
-            logging.info('{}, flip : {}, rotate : {}, batch : {}/{}, Run Time : {:.2f}'.format(time.strftime("%Y-%m-%d %H:%M:%S"), dataloader.dataset._flip, dataloader.dataset._rotate, count, num_batch, time_spent))
+        time_spent = time.time() - time_now
+        time_now = time.time()
+        logging.info(
+            '{}, flip : {}, rotate : {}, batch : {}/{}, Run Time : {:.2f}'
+            .format(
+                time.strftime("%Y-%m-%d %H:%M:%S"), dataloader.dataset._flip,
+                dataloader.dataset._rotate, count, num_batch, time_spent))
 
     return probs_map
 
@@ -88,7 +91,7 @@ def make_dataloader(args, cfg, flip='NONE', rotate='NONE'):
 
 
 def run(args):
-    # os.environ["CUDA_VISIBLE_DEVICES"] = args.GPU
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.GPU
     logging.basicConfig(level=logging.INFO)
 
     with open(args.cfg_path) as f:
@@ -105,8 +108,7 @@ def run(args):
     ckpt = torch.load(args.ckpt_path)
     model = MODELS[cfg['model']](num_nodes=grid_size, use_crf=cfg['use_crf'])
     model.load_state_dict(ckpt['state_dict'])
-    # model = model.cuda().eval()
-    model = model.eval()
+    model = model.cuda().eval()
 
     if not args.eight_avg:
         dataloader = make_dataloader(
