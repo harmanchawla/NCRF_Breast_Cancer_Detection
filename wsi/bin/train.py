@@ -16,7 +16,7 @@ from tensorboardX import SummaryWriter
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 
 torch.manual_seed(0)
-# torch.cuda.manual_seed_all(0)
+torch.cuda.manual_seed_all(0)
 
 from wsi.data.image_producer import GridImageDataset  # noqa
 from wsi.model import MODELS  # noqa
@@ -47,24 +47,22 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
     time_now = time.time()
     for step in range(steps):
         data_tumor, target_tumor = next(dataiter_tumor)
-        # data_tumor = Variable(data_tumor.cuda(async=True))
-        data_tumor = Variable(data_tumor)
-        # target_tumor = Variable(target_tumor.cuda(async=True))
-        target_tumor = Variable(target_tumor)
+        data_tumor = Variable(data_tumor.cuda(async=True))
+        # data_tumor = Variable(data_tumor)
+        target_tumor = Variable(target_tumor.cuda(async=True))
+        # target_tumor = Variable(target_tumor)
 
         data_normal, target_normal = next(dataiter_normal)
-        # data_normal = Variable(data_normal.cuda(async=True))
-        data_normal = Variable(data_normal)
-        # target_normal = Variable(target_normal.cuda(async=True))
-        target_normal = Variable(target_normal)
+        data_normal = Variable(data_normal.cuda(async=True))
+        # data_normal = Variable(data_normal)
+        target_normal = Variable(target_normal.cuda(async=True))
+        # target_normal = Variable(target_normal)
 
-        # idx_rand = Variable(torch.randperm(batch_size * 2).cuda(async=True))
+        idx_rand = Variable(torch.randperm(batch_size * 2).cuda(async=True))
         # idx_rand = Variable(torch.randperm(batch_size * 2))
 
-        # data = torch.cat([data_tumor, data_normal])[idx_rand]
-        data = torch.cat([data_tumor, data_normal])
-        # target = torch.cat([target_tumor, target_normal])[idx_rand]
-        target = torch.cat([target_tumor, target_normal])
+        data = torch.cat([data_tumor, data_normal])[idx_rand]
+        target = torch.cat([target_tumor, target_normal])[idx_rand]
         output = model(data)
         loss = loss_fn(output, target)
 
@@ -73,11 +71,11 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
         optimizer.step()
 
         probs = output.sigmoid()
-        # predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
-        predicts = (probs >= 0.5).type(torch.FloatTensor)
-        # acc_data = (predicts == target).type(torch.cuda.FloatTensor).sum().data[0] * 1.0 / (batch_size * grid_size * 2)
-        acc_data = (predicts == target).type(torch.FloatTensor).sum().item() * 1.0 / (batch_size * grid_size * 2)
-        loss_data = loss.item()
+        predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
+        acc_data = (predicts == target).type(
+            torch.cuda.FloatTensor).sum().data[0] * 1.0 / (
+            batch_size * grid_size * 2)
+        loss_data = loss.data[0]
 
         time_spent = time.time() - time_now
         time_now = time.time()
@@ -103,8 +101,7 @@ def valid_epoch(summary, cfg, model, loss_fn,
                 dataloader_tumor, dataloader_normal):
     model.eval()
 
-    # steps = len(dataloader_tumor)
-    steps = len(dataloader_normal)
+    steps = len(dataloader_tumor)
     batch_size = dataloader_tumor.batch_size
     grid_size = dataloader_tumor.dataset._grid_size
     dataiter_tumor = iter(dataloader_tumor)
@@ -112,34 +109,29 @@ def valid_epoch(summary, cfg, model, loss_fn,
 
     loss_sum = 0
     acc_sum = 0
-    with torch.no_grad():
-        for step in range(steps):
-            data_tumor, target_tumor = next(dataiter_tumor)
-            # data_tumor = Variable(data_tumor.cuda(async=True), volatile=True)
-            data_tumor = Variable(data_tumor)
-            # target_tumor = Variable(target_tumor.cuda(async=True))
-            target_tumor = Variable(target_tumor)
+    for step in range(steps):
+        data_tumor, target_tumor = next(dataiter_tumor)
+        data_tumor = Variable(data_tumor.cuda(async=True), volatile=True)
+        target_tumor = Variable(target_tumor.cuda(async=True))
 
-            data_normal, target_normal = next(dataiter_normal)
-            # data_normal = Variable(data_normal.cuda(async=True), volatile=True)
-            data_normal = Variable(data_normal)
-            # target_normal = Variable(target_normal.cuda(async=True))
-            target_normal = Variable(target_normal)
+        data_normal, target_normal = next(dataiter_normal)
+        data_normal = Variable(data_normal.cuda(async=True), volatile=True)
+        target_normal = Variable(target_normal.cuda(async=True))
 
-            data = torch.cat([data_tumor, data_normal])
-            target = torch.cat([target_tumor, target_normal])
-            output = model(data)
-            loss = loss_fn(output, target)
+        data = torch.cat([data_tumor, data_normal])
+        target = torch.cat([target_tumor, target_normal])
+        output = model(data)
+        loss = loss_fn(output, target)
 
-            probs = output.sigmoid()
-            # predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
-            predicts = (probs >= 0.5).type(torch.FloatTensor)
-            # acc_data = (predicts == target).type(torch.cuda.FloatTensor).sum().data[0] * 1.0 / (batch_size * grid_size * 2)
-            acc_data = (predicts == target).type(torch.FloatTensor).sum().item() * 1.0 / (batch_size * grid_size * 2)
-            loss_data = loss.item()
+        probs = output.sigmoid()
+        predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
+        acc_data = (predicts == target).type(
+            torch.cuda.FloatTensor).sum().data[0] * 1.0 / (
+            batch_size * grid_size * 2)
+        loss_data = loss.data[0]
 
-            loss_sum += loss_data
-            acc_sum += acc_data
+        loss_sum += loss_data
+        acc_sum += acc_data
 
     summary['loss'] = loss_sum / steps
     summary['acc'] = acc_sum / steps
@@ -157,7 +149,7 @@ def run(args):
     with open(os.path.join(args.save_path, 'cfg.json'), 'w') as f:
         json.dump(cfg, f, indent=1)
 
-    # os.environ["CUDA_VISIBLE_DEVICES"] = args.device_ids
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.device_ids
     num_GPU = len(args.device_ids.split(','))
     batch_size_train = cfg['batch_size'] * num_GPU
     batch_size_valid = cfg['batch_size'] * num_GPU * 2
@@ -171,9 +163,8 @@ def run(args):
     grid_size = patch_per_side * patch_per_side
     model = MODELS[cfg['model']](num_nodes=grid_size, use_crf=cfg['use_crf'])
     model = DataParallel(model, device_ids=None)
-    # model = model.cuda()
-    # loss_fn = BCEWithLogitsLoss().cuda()
-    loss_fn = BCEWithLogitsLoss()
+    model = model.cuda()
+    loss_fn = BCEWithLogitsLoss().cuda()
     optimizer = SGD(model.parameters(), lr=cfg['lr'], momentum=cfg['momentum'])
 
     dataset_tumor_train = GridImageDataset(cfg['data_path_tumor_train'],
