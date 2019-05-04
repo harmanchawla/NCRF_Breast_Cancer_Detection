@@ -73,9 +73,9 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
         probs = output.sigmoid()
         predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
         acc_data = (predicts == target).type(
-            torch.cuda.FloatTensor).sum().data[0] * 1.0 / (
+            torch.cuda.FloatTensor).sum().item() * 1.0 / (
             batch_size * grid_size * 2)
-        loss_data = loss.data[0]
+        loss_data = loss.item()
 
         time_spent = time.time() - time_now
         time_now = time.time()
@@ -126,9 +126,9 @@ def valid_epoch(summary, cfg, model, loss_fn,
         probs = output.sigmoid()
         predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
         acc_data = (predicts == target).type(
-            torch.cuda.FloatTensor).sum().data[0] * 1.0 / (
+            torch.cuda.FloatTensor).sum().item() * 1.0 / (
             batch_size * grid_size * 2)
-        loss_data = loss.data[0]
+        loss_data = loss.item()
 
         loss_sum += loss_data
         acc_sum += acc_data
