@@ -7,9 +7,9 @@ from wsi.model.unet_parts import *
 from wsi.model.layers import CRF
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, num_nodes=1, use_crf=True):
+    def __init__(self, 3, 1, num_nodes=1, use_crf=True):
         super(UNet, self).__init__()
-        self.inc = inconv(n_channels, 64)
+        self.inc = inconv(3, 64)
         self.down1 = down(64, 128)
         self.down2 = down(128, 256)
         self.down3 = down(256, 512)
@@ -18,7 +18,7 @@ class UNet(nn.Module):
         self.up2 = up(512, 128)
         self.up3 = up(256, 64)
         self.up4 = up(128, 64)
-        self.outc = outconv(64, n_classes)
+        self.outc = outconv(64, 1)
         self.crf = CRF(num_nodes) if use_crf else None
 
     def forward(self, x):
