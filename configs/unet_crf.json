@@ -1,5 +1,5 @@
 {
-    "model": "UNet",
+    "model": "unet",
     "use_crf": true,
     "batch_size": 10,
     "image_size": 768,
