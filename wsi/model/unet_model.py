@@ -7,7 +7,7 @@ from wsi.model.unet_parts import *
 from wsi.model.layers import CRF
 
 class UNet(nn.Module):
-    def __init__(self, 3, 1, num_nodes=1, use_crf=True):
+    def __init__(self, num_nodes=1, use_crf=True):
         super(UNet, self).__init__()
         self.inc = inconv(3, 64)
         self.down1 = down(64, 128)
