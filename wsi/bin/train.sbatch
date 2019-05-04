@@ -5,6 +5,7 @@
 #SBATCH --mem=40GB
 #SBATCH --mail-type=END
 #SBATCH --mail-user=zy1129@nyu.edu
+#SBATCH --output=slurm_train_%j.out
 
 module purge
 module load python3/intel/3.6.3
