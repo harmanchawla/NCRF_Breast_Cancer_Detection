@@ -31,5 +31,16 @@ class UNet(nn.Module):
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        x = self.outc(x)
-        return F.sigmoid(x)
+        #####x = self.outc(x)
+        feats = x.view(x.size(0),-1)
+        logits = self.outc(feats)
+        feats = feats.view((batch_size, grid_size,-1))
+        logits = logits.view((batch_size, grid_size,-1))
+        
+        if self.crf:
+            logits = self.crf(feats,logits)
+        
+        logits = torch.squeeze(logits)
+        return logits
+        
+        #return F.sigmoid(x)
