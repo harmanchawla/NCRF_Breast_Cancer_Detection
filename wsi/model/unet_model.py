@@ -2,10 +2,12 @@
 
 import torch.nn.functional as F
 
-from wsi.unet.unet_parts import *
+from wsi.model.unet_parts import *
+
+from wsi.model.layers import CRF
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes):
+    def __init__(self, n_channels, n_classes, num_nodes=1, use_crf=True):
         super(UNet, self).__init__()
         self.inc = inconv(n_channels, 64)
         self.down1 = down(64, 128)
@@ -17,6 +19,7 @@ class UNet(nn.Module):
         self.up3 = up(256, 64)
         self.up4 = up(128, 64)
         self.outc = outconv(64, n_classes)
+        self.crf = CRF(num_nodes) if use_crf else None
 
     def forward(self, x):
         x1 = self.inc(x)

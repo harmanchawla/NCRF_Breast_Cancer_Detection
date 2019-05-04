@@ -101,7 +101,8 @@ def valid_epoch(summary, cfg, model, loss_fn,
                 dataloader_tumor, dataloader_normal):
     model.eval()
 
-    steps = len(dataloader_tumor)
+    # steps = len(dataloader_tumor)
+    steps = len(dataloader_normal)
     batch_size = dataloader_tumor.batch_size
     grid_size = dataloader_tumor.dataset._grid_size
     dataiter_tumor = iter(dataloader_tumor)
