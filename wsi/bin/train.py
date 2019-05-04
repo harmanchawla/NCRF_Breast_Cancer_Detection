@@ -58,11 +58,11 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
         target_normal = Variable(target_normal.cuda(async=True))
         # target_normal = Variable(target_normal)
 
-        idx_rand = Variable(torch.randperm(batch_size * 2).cuda(async=True))
+        # idx_rand = Variable(torch.randperm(batch_size * 2).cuda(async=True))
         # idx_rand = Variable(torch.randperm(batch_size * 2))
 
-        data = torch.cat([data_tumor, data_normal])[idx_rand]
-        target = torch.cat([target_tumor, target_normal])[idx_rand]
+        data = torch.cat([data_tumor, data_normal]) # [idx_rand]
+        target = torch.cat([target_tumor, target_normal]) # [idx_rand]
         output = model(data)
         loss = loss_fn(output, target)
 
@@ -72,9 +72,9 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
 
         probs = output.sigmoid()
         predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
-        acc_data = (predicts == target).type(
-            torch.cuda.FloatTensor).sum().item() * 1.0 / (
-            batch_size * grid_size * 2)
+        acc_data = (predicts == target).type(torch.cuda.FloatTensor)
+        acc_data = acc_data.sum().item()
+        acc_data = acc_data * 1.0 / (batch_size * grid_size * 2)
         loss_data = loss.item()
 
         time_spent = time.time() - time_now
