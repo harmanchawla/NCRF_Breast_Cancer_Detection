@@ -14,6 +14,6 @@ source ../pyenv/py/3.6.3/bin/activate
 
 for file in $(ls ../data/wsi/); do
     filename=${file%.*}
-    python3 wsi/bin/tissue_mask.py ../data/wsi/$filename.tif ../data/tissue_mask/$filename.npy
+    python3 wsi/bin/tissue_mask.py --level 0 ../data/wsi/$filename.tif ../data/tissue_mask/$filename.npy
 done
 
