@@ -48,16 +48,20 @@ class GridWSIPatchDataset(Dataset):
         X_slide, Y_slide = self._slide.level_dimensions[0]
         X_mask, Y_mask = self._mask.shape
 
+        '''
         if X_slide / X_mask != Y_slide / Y_mask:
             raise Exception('Slide/Mask dimension does not match ,'
                             ' X_slide / X_mask : {} / {},'
                             ' Y_slide / Y_mask : {} / {}'
                             .format(X_slide, X_mask, Y_slide, Y_mask))
+        '''
 
         self._resolution = X_slide * 1.0 / X_mask
+        '''
         if not np.log2(self._resolution).is_integer():
             raise Exception('Resolution (X_slide / X_mask) is not power of 2 :'
                             ' {}'.format(self._resolution))
+        '''
 
         # all the idces for tissue region from the tissue mask
         self._X_idcs, self._Y_idcs = np.where(self._mask)

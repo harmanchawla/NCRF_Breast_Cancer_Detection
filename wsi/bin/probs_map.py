@@ -97,11 +97,9 @@ def run(args):
     with open(args.cfg_path) as f:
         cfg = json.load(f)
 
-    '''
     if cfg['image_size'] % cfg['patch_size'] != 0:
             raise Exception('Image size / patch size != 0 : {} / {}'.
                             format(cfg['image_size'], cfg['patch_size']))
-    '''
 
     patch_per_side = cfg['image_size'] // cfg['patch_size']
     grid_size = patch_per_side * patch_per_side
