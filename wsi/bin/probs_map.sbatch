@@ -1,8 +1,10 @@
 #!/bin/bash
 
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:1
 #SBATCH -t48:00:00
-#SBATCH --mem=40GB
+#SBATCH --mem=100GB
 #SBATCH --mail-type=END
 #SBATCH --mail-user=zy1129@nyu.edu
 #SBATCH --output=slurm_probs_map_%j.out

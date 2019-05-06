@@ -21,9 +21,9 @@ probs_map = np.load('probs_map/' + filename)
 
 fig = plt.figure()
 fig1 = fig.add_subplot(1, 2, 1)
-fig1.imshow(tissue_mask.transpose(), vmin=0, vmax=1, cmap='jet')
+fig1.imshow(tissue_mask.transpose(), vmin=0, vmax=1, cmap='gray')
 
 fig2 = fig.add_subplot(1, 2, 2)
-fig2.imshow(probs_map.transpose(), vmin=0, vmax=1, cmap='jet')
+fig2.imshow(probs_map.transpose(), vmin=0, vmax=1, cmap='gray')
 
 plt.show()
