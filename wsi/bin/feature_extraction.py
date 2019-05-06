@@ -146,13 +146,11 @@ if __name__ == '__main__':
                   'patient_107_node_4', #10, micro, test
                   'patient_112_node_0' #11, macro, test
                   ]
-    filename = toy_sample[0]
-    probs_map = np.load('probs_map/' + filename + '.npy')
-    features = extract_features(probs_map)
-    
-    
+    outfile = open('features/features.csv', 'w')
     for filename in toy_sample:
-        outfile = open('features/' + filename + '.csv', 'w')
+        probs_map = np.load('probs_map/' + filename + '.npy')
+        features = extract_features(probs_map)
         for feature in features:
-            outfile.write('{:0.5f}'.format(feature) + '\n')
-        outfile.close()
+            outfile.write('{:0.5f}'.format(feature) + ',')
+        outfile.write('\n')
+    outfile.close()
