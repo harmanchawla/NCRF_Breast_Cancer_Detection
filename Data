@@ -1,7 +1,9 @@
 Dataset
-We are using Camelyon 16 dataset for this project which consists images of both normal and tumor cells.
+We are using Camelyon 16 dataset for this project which consists images of both normal and tumor cells and Camelyon 17 dataset which 
+consists of data of 100 patients across 5 different centres and each patient have 5 slide images categorized as negative, itc, 
+macro and micro metastisis.
 
-The dataset consists of training and testing. Training dataset has both normal and tumor images. The entire size of dataset 
-is around 700 GB.
+The dataset consists of training and testing. 
+The entire size of dataset is around 3.03 TB.
 
 The link for downloading the dataset is : https://drive.google.com/drive/folders/0BzsdkU4jWx9Bb19WNndQTlUwb2M
