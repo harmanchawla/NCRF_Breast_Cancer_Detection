@@ -10,10 +10,11 @@
 module purge
 module load python3/intel/3.6.3
 module load openslide/intel/3.4.1
-source ../pyenv/py/3.6.3/bin/activate
+source ../pyenv/py3.6.3/bin/activate
 
-for file in $(ls ../data/wsi/); do
-    filename=${file%.*}
-    python3 wsi/bin/tissue_mask.py ../data/wsi/$filename.tif ../data/tissue_mask/$filename.npy
-done
+t=$((SLURM_ARRAY_TASK_ID-1))
+p=$((t/5))
+s=$((t-p*5))
+printf -v p0 "%03d" $p
 
+python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$p0_node_$s.tif ../data/tissue_mask_train/patient_$p0_node_$s.npy
