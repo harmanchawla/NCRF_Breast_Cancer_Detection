@@ -16,6 +16,7 @@ t=$((SLURM_ARRAY_TASK_ID-1))
 p=$((t/5))
 s=$((t-p*5))
 printf -v p0 "%03d" $p
+x='_node_'
+filename=patient_$p0$x$s
 
-python3 wsi/bin/probs_map.py ../data/wsi_train/patient_$p0_node_$s.tif ckpt/resnet18_crf.ckpt configs/resnet18_crf.json ../data/tissue_mask_train/patient_$p0_node_$s.npy ../data/probs_map_train/patient_$p0_node_$s.npy
-
+python3 wsi/bin/probs_map.py ../data/wsi_train/$filename.tif ckpt/resnet18_crf.ckpt configs/resnet18_crf.json ../data/tissue_mask_train/$filename.npy ../data/probs_map_train/$filename.npy

@@ -15,7 +15,7 @@ toy_sample = ['patient_000_node_3.npy', #0, negative
               'patient_112_node_0.npy' #11, macro, test
               ]
 
-filename = toy_sample[0]
+filename = toy_sample[6]
 tissue_mask = np.load('tissue_mask/' + filename)
 probs_map = np.load('probs_map/' + filename)
 
