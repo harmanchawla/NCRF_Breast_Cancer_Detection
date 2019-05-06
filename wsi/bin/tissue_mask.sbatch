@@ -17,6 +17,6 @@ PATIENT=$((TASK_ID/5))
 SLIDE_ID=$((TASK_ID-PATIENT*5))
 printf -v PATIENT_ID "%03d" $PATIENT
 
-echo 'python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$PATIENT_ID_node_$SLIDE_ID.tif ../data/tissue_mask_train/patient_$PATIENT_ID_node_$SLIDE_ID.npy'
+echo python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$PATIENT_ID_node_$SLIDE_ID.tif ../data/tissue_mask_train/patient_$PATIENT_ID_node_$SLIDE_ID.npy
 
 python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$PATIENT_ID_node_$SLIDE_ID.tif ../data/tissue_mask_train/patient_$PATIENT_ID_node_$SLIDE_ID.npy
