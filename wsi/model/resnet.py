@@ -10,7 +10,6 @@ __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
 
 
 def conv3x3(in_planes, out_planes, stride=1):
-    """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
 
@@ -90,15 +89,6 @@ class ResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1, num_nodes=1,
                  use_crf=True):
-        """Constructs a ResNet model.
-
-        Args:
-            num_classes: int, since we are doing binary classification
-                (tumor vs normal), num_classes is set to 1 and sigmoid instead
-                of softmax is used later
-            num_nodes: int, number of nodes/patches within the fully CRF
-            use_crf: bool, use the CRF component or not
-        """
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -140,19 +130,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        """
-        Args:
-            x: 5D tensor with shape of
-            [batch_size, grid_size, 3, crop_size, crop_size],
-            where grid_size is the number of patches within a grid (e.g. 9 for
-            a 3x3 grid); crop_size is 224 by default for ResNet input;
-
-        Returns:
-            logits, 2D tensor with shape of [batch_size, grid_size], the logit
-            of each patch within the grid being tumor
-        """
         batch_size, grid_size, _, crop_size = x.shape[0:4]
-        # flatten grid_size dimension and combine it into batch dimension
         x = x.view(-1, 3, crop_size, crop_size)
 
         x = self.conv1(x)
@@ -166,11 +144,9 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        # feats means features, i.e. patch embeddings from ResNet
         feats = x.view(x.size(0), -1)
         logits = self.fc(feats)
 
-        # restore grid_size dimension for CRF
         feats = feats.view((batch_size, grid_size, -1))
         logits = logits.view((batch_size, grid_size, -1))
 
@@ -183,40 +159,30 @@ class ResNet(nn.Module):
 
 
 def resnet18(**kwargs):
-    """Constructs a ResNet-18 model.
-    """
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
     return model
 
 
 def resnet34(**kwargs):
-    """Constructs a ResNet-34 model.
-    """
     model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
 
     return model
 
 
 def resnet50(**kwargs):
-    """Constructs a ResNet-50 model.
-    """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
     return model
 
 
 def resnet101(**kwargs):
-    """Constructs a ResNet-101 model.
-    """
     model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
 
     return model
 
 
 def resnet152(**kwargs):
-    """Constructs a ResNet-152 model.
-    """
     model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
 
     return model

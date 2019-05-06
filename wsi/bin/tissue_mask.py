@@ -27,7 +27,6 @@ def run(args):
 
     slide = openslide.OpenSlide(args.wsi_path)
 
-    # note the shape of img_RGB is the transpose of slide.level_dimensions
     img_RGB = np.transpose(np.array(slide.read_region((0, 0),
                            args.level,
                            slide.level_dimensions[args.level]).convert('RGB')),

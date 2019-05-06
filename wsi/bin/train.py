@@ -18,8 +18,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
 
-from wsi.data.image_producer import GridImageDataset  # noqa
-from wsi.model import MODELS  # noqa
+from wsi.data.image_producer import GridImageDataset
+from wsi.model import MODELS
 
 
 parser = argparse.ArgumentParser(description='Train model')
