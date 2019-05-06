@@ -12,11 +12,11 @@ module load python3/intel/3.6.3
 module load openslide/intel/3.4.1
 source ../pyenv/py3.6.3/bin/activate
 
-TASK_ID=$((SLURM_ARRAY_TASK_ID-1))
-PATIENT=$((TASK_ID/5))
-SLIDE_ID=$((TASK_ID-PATIENT*5))
-printf -v PATIENT_ID "%03d" $PATIENT
+t=$((SLURM_ARRAY_TASK_ID-1))
+p=$((t/5))
+s=$((t-p*5))
+printf -v p0 "%03d" $p
+x='_node_'
+filename=patient_$p0$x$s
 
-echo python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$PATIENT_ID_node_$SLIDE_ID.tif ../data/tissue_mask_train/patient_$PATIENT_ID_node_$SLIDE_ID.npy
-
-python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$PATIENT_ID_node_$SLIDE_ID.tif ../data/tissue_mask_train/patient_$PATIENT_ID_node_$SLIDE_ID.npy
+python3 wsi/bin/tissue_mask.py ../data/wsi_train/$filename.tif ../data/tissue_mask_train/$filename.npy
