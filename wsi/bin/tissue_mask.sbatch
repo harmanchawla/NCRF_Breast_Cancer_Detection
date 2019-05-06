@@ -17,4 +17,5 @@ p=$((t/5))
 s=$((t-p*5))
 printf -v p0 "%03d" $p
 
+echo 'python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$p0_node_$s.tif ../data/tissue_mask_train/patient_$p0_node_$s.npy'
 python3 wsi/bin/tissue_mask.py ../data/wsi_train/patient_$p0_node_$s.tif ../data/tissue_mask_train/patient_$p0_node_$s.npy
