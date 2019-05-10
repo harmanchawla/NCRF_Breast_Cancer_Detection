@@ -13,6 +13,53 @@ FILTER_DIM = 2
 N_FEATURES = 31
 MAX, MEAN, VARIANCE, SKEWNESS, KURTOSIS = 0, 1, 2, 3, 4
 
+    '''
+    Feature list:
+        -> (01) given t = 0.90, total number of tumor regions
+        -> (02) given t = 0.50, the area of largest tumor region
+        -> (03) given t = 0.50, the longest axis in the largest tumor region
+        -> (04) given t = 0.90, total number pixels with probability greater than 0.90
+        -> (05) given t = 0.90, average prediction across tumor region
+        -> (06-10) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'area'
+        -> (11-15) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'perimeter'
+        -> (16-20) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'eccentricity'
+        -> (21-25) given t = 0.50, max, mean, variance, skewness, and kurtosis of 'rectangularity(extent)'
+        -> (26-30) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'solidity'
+        '''
+
+feature_names = [
+    'number of tumor regions',
+    'area of largest tumor region',
+    'longest axis in the largest tumor region',
+    'number of pixels with tumor prob > 0.9',
+    'average prediction across tumor regions',
+    'max of area',
+    'mean of area',
+    'variance of area',
+    'skewness of area',
+    'kurtosis of area',
+    'max of perimeter',
+    'mean of perimeter',
+    'variance of perimeter',
+    'skewness of perimeter',
+    'kurtosis of perimeter',
+    'max of eccentricity',
+    'mean of eccentricity',
+    'variance of eccentricity',
+    'skewness of eccentricity',
+    'kurtosis of eccentricity',
+    'max of rectangularity',
+    'mean of rectangularity',
+    'variance of rectangularity',
+    'skewness of rectangularity',
+    'kurtosis of rectangularity',
+    'max of solidity',
+    'mean of solidity',
+    'variance of solidity',
+    'skewness of solidity',
+    'kurtosis of solidity'
+]
+
 def format_2f(number):
     return float("{0:.2f}".format(number))
 
@@ -61,18 +108,6 @@ def get_average_prediction_across_tumor_regions(region_props):
 
 def extract_features(heatmap_prob):
     """
-        Feature list:
-        -> (01) given t = 0.90, total number of tumor regions
-        -> (02) given t = 0.50, the area of largest tumor region
-        -> (03) given t = 0.50, the longest axis in the largest tumor region
-        -> (04) given t = 0.90, total number pixels with probability greater than 0.90
-        -> (05) given t = 0.90, average prediction across tumor region
-        -> (06-10) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'area'
-        -> (11-15) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'perimeter'
-        -> (16-20) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'eccentricity'
-        -> (21-25) given t = 0.50, max, mean, variance, skewness, and kurtosis of 'rectangularity(extent)'
-        -> (26-30) given t = 0.90, max, mean, variance, skewness, and kurtosis of 'solidity'
-        
         :param heatmap_prob:
         :return:
         
@@ -81,9 +116,9 @@ def extract_features(heatmap_prob):
     heatmap_threshold_t90 = np.array(heatmap_prob)
     heatmap_threshold_t50 = np.array(heatmap_prob)
     heatmap_threshold_t90[heatmap_threshold_t90 < 0.90] = 0
-    heatmap_threshold_t90[heatmap_threshold_t90 >= 0.90] = 255
+    heatmap_threshold_t90[heatmap_threshold_t90 >= 0.90] = 1
     heatmap_threshold_t50[heatmap_threshold_t50 <= 0.50] = 0
-    heatmap_threshold_t50[heatmap_threshold_t50 > 0.50] = 255
+    heatmap_threshold_t50[heatmap_threshold_t50 > 0.50] = 1
     
     heatmap_threshold_t90_2d = heatmap_threshold_t90
     heatmap_threshold_t50_2d = heatmap_threshold_t50
@@ -95,15 +130,25 @@ def extract_features(heatmap_prob):
     features = []
                                           
     f_count_tumor_region = len(region_props_t90)
-
+    '''
+    if f_count_tumor_region == 0:
+        return [0.00] * N_FEATURES
+    '''
+    
     features.append(format_2f(f_count_tumor_region))
 
     largest_tumor_region_index_t90 = get_largest_tumor_index(region_props_t90)
     largest_tumor_region_index_t50 = get_largest_tumor_index(region_props_t50)
-    f_area_largest_tumor_region_t50 = region_props_t50[largest_tumor_region_index_t50].area
+    if largest_tumor_region_index_t50 != -1:
+        f_area_largest_tumor_region_t50 = region_props_t50[largest_tumor_region_index_t50].area
+    else:
+        f_area_largest_tumor_region_t50 = 0
     features.append(format_2f(f_area_largest_tumor_region_t50))
 
-    f_longest_axis_largest_tumor_region_t50 = get_longest_axis_in_largest_tumor_region(region_props_t50, largest_tumor_region_index_t50)
+    if largest_tumor_region_index_t50 != -1:
+        f_longest_axis_largest_tumor_region_t50 = get_longest_axis_in_largest_tumor_region(region_props_t50, largest_tumor_region_index_t50)
+    else:
+        f_longest_axis_largest_tumor_region_t50 = 0
     features.append(format_2f(f_longest_axis_largest_tumor_region_t50))
 
     f_pixels_count_prob_gt_90 = cv2.countNonZero(heatmap_threshold_t90_2d)
@@ -133,6 +178,7 @@ def extract_features(heatmap_prob):
     return features
 
 if __name__ == '__main__':
+    '''
     toy_sample = ['patient_000_node_3', #0, negative
                   'patient_005_node_3', #1, itc
                   'patient_007_node_4', #2, micro
@@ -146,11 +192,25 @@ if __name__ == '__main__':
                   'patient_107_node_4', #10, micro, test
                   'patient_112_node_0' #11, macro, test
                   ]
-    outfile = open('features/features.csv', 'w')
     for filename in toy_sample:
         probs_map = np.load('probs_map/' + filename + '.npy')
         features = extract_features(probs_map)
         for feature in features:
             outfile.write('{:0.5f}'.format(feature) + ',')
         outfile.write('\n')
+    '''
+    
+    outfile = open('features/features.csv', 'w')
+    outfile.write(' ')
+    for i in range(len(feature_names)):
+        outfile.write(',' + feature_names[i])
+    outfile.write('\n')
+    for i in range(50):
+        for j in range(5):
+            outfile.write('patient_' + str(i).zfill(3) + '_node_' + str(j))
+            probs_map = np.load('../cam_17_train_probmaps/patient_' + str(i).zfill(3) + '_node_' + str(j) + '.npy')
+            features = extract_features(probs_map)
+            for k in range(len(features)):
+                outfile.write(',' + '{:0.5f}'.format(features[k]))
+            outfile.write('\n')
     outfile.close()

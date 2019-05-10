@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
+'''
 toy_sample = ['patient_000_node_3.npy', #0, negative
               'patient_005_node_3.npy', #1, itc
               'patient_007_node_4.npy', #2, micro
@@ -16,6 +17,8 @@ toy_sample = ['patient_000_node_3.npy', #0, negative
               ]
 
 filename = toy_sample[6]
+'''
+
 tissue_mask = np.load('tissue_mask/' + filename)
 probs_map = np.load('probs_map/' + filename)
 
