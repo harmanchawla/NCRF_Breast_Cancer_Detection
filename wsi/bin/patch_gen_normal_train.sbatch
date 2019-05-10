@@ -1,6 +1,8 @@
 #!/bin/bash
 
-#SBATCH --gres=gpu:1
+#SBATCH --node=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=5
 #SBATCH -t48:00:00
 #SBATCH --mem=40GB
 #SBATCH --mail-type=END
