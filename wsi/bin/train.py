@@ -39,6 +39,8 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
     model.train()
 
     steps = len(dataloader_tumor)
+    if steps > len(dataloader_normal):
+        steps = len(dataloader_normal)
     batch_size = dataloader_tumor.batch_size
     grid_size = dataloader_tumor.dataset._grid_size
     dataiter_tumor = iter(dataloader_tumor)
