@@ -8,7 +8,7 @@ import openslide
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_otsu
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
 
 parser = argparse.ArgumentParser(description='Get tissue mask of WSI and save'
                                  ' it in npy format')

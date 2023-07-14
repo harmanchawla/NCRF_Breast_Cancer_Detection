@@ -121,16 +121,13 @@ class ResNet(nn.Module):
                 nn.BatchNorm2d(planes * block.expansion),
             )
 
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers = [block(self.inplanes, planes, stride, downsample)]
         self.inplanes = planes * block.expansion
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
-
+        layers.extend(block(self.inplanes, planes) for _ in range(1, blocks))
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        batch_size, grid_size, _, crop_size = x.shape[0:4]
+        batch_size, grid_size, _, crop_size = x.shape[:4]
         x = x.view(-1, 3, crop_size, crop_size)
 
         x = self.conv1(x)
@@ -159,30 +156,20 @@ class ResNet(nn.Module):
 
 
 def resnet18(**kwargs):
-    model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
-
-    return model
+    return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
 
 def resnet34(**kwargs):
-    model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
-
-    return model
+    return ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
 
 
 def resnet50(**kwargs):
-    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
-
-    return model
+    return ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
 def resnet101(**kwargs):
-    model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
-
-    return model
+    return ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
 
 
 def resnet152(**kwargs):
-    model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
-
-    return model
+    return ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)

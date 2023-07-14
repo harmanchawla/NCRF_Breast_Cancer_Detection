@@ -119,24 +119,21 @@ def extract_features(heatmap_prob):
     heatmap_threshold_t90[heatmap_threshold_t90 >= 0.90] = 1
     heatmap_threshold_t50[heatmap_threshold_t50 <= 0.50] = 0
     heatmap_threshold_t50[heatmap_threshold_t50 > 0.50] = 1
-    
+
     heatmap_threshold_t90_2d = heatmap_threshold_t90
     heatmap_threshold_t50_2d = heatmap_threshold_t50
     heatmap_prob_2d = heatmap_prob
 
     region_props_t90 = get_region_props(np.array(heatmap_threshold_t90_2d), heatmap_prob_2d)
     region_props_t50 = get_region_props(np.array(heatmap_threshold_t50_2d), heatmap_prob_2d)
-    
-    features = []
-                                          
+
     f_count_tumor_region = len(region_props_t90)
     '''
     if f_count_tumor_region == 0:
         return [0.00] * N_FEATURES
     '''
-    
-    features.append(format_2f(f_count_tumor_region))
 
+    features = [format_2f(f_count_tumor_region)]
     largest_tumor_region_index_t90 = get_largest_tumor_index(region_props_t90)
     largest_tumor_region_index_t50 = get_largest_tumor_index(region_props_t50)
     if largest_tumor_region_index_t50 != -1:
@@ -162,19 +159,19 @@ def extract_features(heatmap_prob):
 
     f_area = get_feature(region_props_t90, f_count_tumor_region, 'area')
     features += f_area
-    
+
     f_perimeter = get_feature(region_props_t90, f_count_tumor_region, 'perimeter')
     features += f_perimeter
-    
+
     f_eccentricity = get_feature(region_props_t90, f_count_tumor_region, 'eccentricity')
     features += f_eccentricity
-    
+
     f_extent_t50 = get_feature(region_props_t50, len(region_props_t50), 'extent')
     features += f_extent_t50
-    
+
     f_solidity = get_feature(region_props_t90, f_count_tumor_region, 'solidity')
     features += f_solidity
-    
+
     return features
 
 if __name__ == '__main__':
@@ -199,18 +196,19 @@ if __name__ == '__main__':
             outfile.write('{:0.5f}'.format(feature) + ',')
         outfile.write('\n')
     '''
-    
-    outfile = open('features/features.csv', 'w')
-    outfile.write(' ')
-    for i in range(len(feature_names)):
-        outfile.write(',' + feature_names[i])
-    outfile.write('\n')
-    for i in range(50):
-        for j in range(5):
-            outfile.write('patient_' + str(i).zfill(3) + '_node_' + str(j))
-            probs_map = np.load('../cam_17_train_probmaps/patient_' + str(i).zfill(3) + '_node_' + str(j) + '.npy')
-            features = extract_features(probs_map)
-            for k in range(len(features)):
-                outfile.write(',' + '{:0.5f}'.format(features[k]))
-            outfile.write('\n')
-    outfile.close()
+
+    with open('features/features.csv', 'w') as outfile:
+        outfile.write(' ')
+        for i in range(len(feature_names)):
+            outfile.write(f',{feature_names[i]}')
+        outfile.write('\n')
+        for i in range(50):
+            for j in range(5):
+                outfile.write(f'patient_{str(i).zfill(3)}_node_{str(j)}')
+                probs_map = np.load(
+                    f'../cam_17_train_probmaps/patient_{str(i).zfill(3)}_node_{str(j)}.npy'
+                )
+                features = extract_features(probs_map)
+                for k in range(len(features)):
+                    outfile.write(',' + '{:0.5f}'.format(features[k]))
+                outfile.write('\n')

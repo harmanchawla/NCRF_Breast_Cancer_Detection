@@ -27,7 +27,7 @@ DIRS = {
     '_static': 'static',
     '_sources': 'sources',
 }
-REWRITE_EXTENSIONS = set(['.html', '.js'])
+REWRITE_EXTENSIONS = {'.html', '.js'}
 
 import os
 from sphinx.util.console import bold
@@ -45,7 +45,7 @@ def remove_directory_underscores(app, exception):
                 with open(path) as fh:
                     contents = fh.read()
                 for old, new in DIRS.items():
-                    contents = contents.replace(old + '/', new + '/')
+                    contents = contents.replace(f'{old}/', f'{new}/')
                 with open(path, 'w') as fh:
                     fh.write(contents)
     # Move directory contents

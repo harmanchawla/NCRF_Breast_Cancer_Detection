@@ -56,7 +56,7 @@ def load_slide():
         'DEEPZOOM_OVERLAP': 'overlap',
         'DEEPZOOM_LIMIT_BOUNDS': 'limit_bounds',
     }
-    opts = dict((v, app.config[k]) for k, v in config_map.items())
+    opts = {v: app.config[k] for k, v in config_map.items()}
     slide = open_slide(slidefile)
     app.slides = {
         SLIDE_NAME: DeepZoomGenerator(slide, **opts)
@@ -78,8 +78,10 @@ def load_slide():
 @app.route('/')
 def index():
     slide_url = url_for('dzi', slug=SLIDE_NAME)
-    associated_urls = dict((name, url_for('dzi', slug=slugify(name)))
-            for name in app.associated_images)
+    associated_urls = {
+        name: url_for('dzi', slug=slugify(name))
+        for name in app.associated_images
+    }
     return render_template('slide-multipane.html', slide_url=slide_url,
             associated=associated_urls, properties=app.slide_properties,
             slide_mpp=app.slide_mpp)
@@ -100,21 +102,18 @@ def dzi(slug):
 @app.route('/<slug>_files/<int:level>/<int:col>_<int:row>.<format>')
 def tile(slug, level, col, row, format):
     format = format.lower()
-    if format != 'jpeg' and format != 'png':
+    if format not in ['jpeg', 'png']:
         # Not supported by Deep Zoom
         abort(404)
     try:
         tile = app.slides[slug].get_tile(level, (col, row))
-    except KeyError:
+    except (KeyError, ValueError):
         # Unknown slug
-        abort(404)
-    except ValueError:
-        # Invalid level or coordinates
         abort(404)
     buf = PILBytesIO()
     tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
     resp = make_response(buf.getvalue())
-    resp.mimetype = 'image/%s' % format
+    resp.mimetype = f'image/{format}'
     return resp
 
 

@@ -97,7 +97,7 @@ while i < len(slide_paths):
     anno_path = Path(anno_path)
     # checking if the name contains tumor. It is used later to do specific tasks.
     slide_contains_tumor = osp.basename(slide_paths_total[i]).startswith('tumor_')
-    
+
     # for each slide for which we have been given a path
     with openslide.open_slide(slide_paths_total[i]) as slide:
 
@@ -126,14 +126,14 @@ while i < len(slide_paths):
         # Initializing a DF bboxt which will be used to set the boundaries. 
         bboxtcols = ['xmin', 'xmax', 'ymin', 'ymax'] # bboxtcols underscores the structure of the df
         bboxt = pd.DataFrame(columns=bboxtcols)
-        
+
         for c in contours:
             # returns the top-left co-ordinates along with width and height which are used to 
             # calculate the size and add it to the dataframe
             (x, y, w, h) = cv2.boundingRect(c)
             bboxt = bboxt.append(pd.Series([x, x+w, y, y+h], index = bboxtcols), ignore_index=True)
             bboxt = pd.DataFrame(bboxt)
-         
+
         # each column of the dataframe is stored as a python list 
         # so that we can the max and min element in each column
         xxmin = list(bboxt['xmin'].get_values())
@@ -142,7 +142,7 @@ while i < len(slide_paths):
         yymax = list(bboxt['ymax'].get_values())
 
         bboxt = math.floor(np.min(xxmin)*256), math.floor(np.max(xxmax)*256), math.floor(np.min(yymin)*256), math.floor(np.max(yymax)*256)
-    
+
     # if it is a file with tumor in it's name
     if slide_contains_tumor:
 
@@ -152,45 +152,45 @@ while i < len(slide_paths):
 
         with openslide.open_slide(str(truth_slide_path)) as truth:
 
-          slide = openslide.open_slide(slide_paths_total[i])
+            slide = openslide.open_slide(slide_paths_total[i])
 
-          # convert xml to a temp dataframe
-          annotations = convert_xml_df(str(Anno_pathxml))
+            # convert xml to a temp dataframe
+            annotations = convert_xml_df(str(Anno_pathxml))
 
-          # just as above, get the co-ordinate values and calculate the boundary values 
-          x_values = list(annotations['X'].get_values())
-          y_values = list(annotations['Y'].get_values())
-          bbox = math.floor(np.min(x_values)), math.floor(np.max(x_values)), math.floor(np.min(y_values)), math.floor(np.max(y_values))
-          
-          temp=0
-         
-          while temp in range(0, 1000):
-            # r = [rgb_image, rgb_binary, rgb_mask, index]
-            r=random_crop(slide, truth, thresh, crop_size, bbox)
-            if (cv2.countNonZero(r[2]) > crop_size[0]*crop_size[1]*0.5) and (temp <= 1000):
-    
-                saveim('/avengers/harmanchawla/Downloads/test/tumor/%s_%d_%d.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], r[3][0], r[3][1]), r[0])
-                io.imsave('/avengers/harmanchawla/Downloads/test/mask/%s_%d_%d_mask.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], r[3][0], r[3][1]), r[2])
-                print(r[2])
-                temp = temp +1
-            
+            # just as above, get the co-ordinate values and calculate the boundary values 
+            x_values = list(annotations['X'].get_values())
+            y_values = list(annotations['Y'].get_values())
+            bbox = math.floor(np.min(x_values)), math.floor(np.max(x_values)), math.floor(np.min(y_values)), math.floor(np.max(y_values))
+
+            temp=0
+
+            while temp in range(0, 1000):
+                # r = [rgb_image, rgb_binary, rgb_mask, index]
+                r=random_crop(slide, truth, thresh, crop_size, bbox)
+                if (cv2.countNonZero(r[2]) > crop_size[0]*crop_size[1]*0.5) and (temp <= 1000):
+                    
+                    saveim('/avengers/harmanchawla/Downloads/test/tumor/%s_%d_%d.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], r[3][0], r[3][1]), r[0])
+                    io.imsave('/avengers/harmanchawla/Downloads/test/mask/%s_%d_%d_mask.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], r[3][0], r[3][1]), r[2])
+                    print(r[2])
+                    temp += 1
+                                
 
     else:
-        temp=0    
+        temp=0
         slide = openslide.open_slide(slide_paths_total[i])
 
         while temp in range(0, 1000):
             # nr = [gb_image, rgb_binary, index]
             nr=random_crop_normal(slide, thresh, crop_size, bboxt)
-            
+
             if (cv2.countNonZero(r[1]) > crop_size[0]*crop_size[1]*0.2) and (temp <= 1000):
-               nmask = np.zeros((256, 256))
+                nmask = np.zeros((256, 256))
 
-               saveim('/avengers/harmanchawla/Downloads/test/normal/%s_%d_%d.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], nr[2][0], nr[2][1]),nr[0])
-               io.imsave('/avengers/harmanchawla/Downloads/test/nmask/%s_%d_%d_mask.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], nr[2][0], nr[2][1]), nmask)
-               temp= temp+1
+                saveim('/avengers/harmanchawla/Downloads/test/normal/%s_%d_%d.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], nr[2][0], nr[2][1]),nr[0])
+                io.imsave('/avengers/harmanchawla/Downloads/test/nmask/%s_%d_%d_mask.png' % (osp.splitext(osp.basename(slide_paths_total[i]))[0], nr[2][0], nr[2][1]), nmask)
+                temp += 1
 
-    i=i+1
+    i += 1
 
 # cropping tumor images 
 def random_crop(slide, truth, thresh, crop_size, bbox):
@@ -235,10 +235,6 @@ def random_crop_normal(slide, thresh, crop_size, bboxt):
 
 def testduplicates(list):   
     for each in list:  
-        count = list.count(each)  
-        if count > 1:  
-            z = 0
-        else:
-        
-            z = 1
+        count = list.count(each)
+        z = 0 if count > 1 else 1
     return z  

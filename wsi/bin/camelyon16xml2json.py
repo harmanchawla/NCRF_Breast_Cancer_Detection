@@ -3,7 +3,7 @@ import os
 import argparse
 import logging
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
 
 from wsi.data.annotation import Formatter  # noqa
 

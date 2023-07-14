@@ -66,7 +66,7 @@ except ImportError:
         extra copy in the caller.'''
         # First reorder the bytes in a pixel from native-endian aRGB to
         # big-endian RGBa to work around limitations in RGBa loader
-        rawmode = (sys.byteorder == 'little') and 'BGRA' or 'ARGB'
+        rawmode = 'BGRA' if sys.byteorder == 'little' else 'ARGB'
         buf = PIL.Image.frombuffer('RGBA', size, buf, 'raw', rawmode, 0,
                 1).tostring()
         # Now load the image as RGBA, undoing premultiplication
@@ -164,10 +164,10 @@ def _check_name_list(result, func, args):
     _check_error(result, func, args)
     names = []
     for i in count():
-        name = result[i]
-        if not name:
+        if name := result[i]:
+            names.append(name.decode('UTF-8', 'replace'))
+        else:
             break
-        names.append(name.decode('UTF-8', 'replace'))
     return names
 
 # resolve and return an OpenSlide function with the specified properties

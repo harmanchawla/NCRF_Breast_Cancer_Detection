@@ -11,7 +11,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
 
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
@@ -47,9 +47,8 @@ def get_probs_map(model, dataloader):
     num_batch = len(dataloader)
     idx_center = dataloader.dataset._grid_size // 2
 
-    count = 0
     time_now = time.time()
-    for (data, x_mask, y_mask) in dataloader:
+    for count, (data, x_mask, y_mask) in enumerate(dataloader, start=1):
         data = Variable(data.cuda(async=True), volatile=True)
         output = model(data)
         if len(output.shape) == 1:
@@ -58,8 +57,6 @@ def get_probs_map(model, dataloader):
             probs = output[:,
                            idx_center].sigmoid().cpu().data.numpy().flatten()
         probs_map[x_mask, y_mask] = probs
-        count += 1
-
         time_spent = time.time() - time_now
         time_now = time.time()
         logging.info(
@@ -75,15 +72,21 @@ def make_dataloader(args, cfg, flip='NONE', rotate='NONE'):
     batch_size = cfg['batch_size'] * 2
     num_workers = args.num_workers
 
-    dataloader = DataLoader(
-        GridWSIPatchDataset(args.wsi_path, args.mask_path,
-                            image_size=cfg['image_size'],
-                            patch_size=cfg['patch_size'],
-                            crop_size=cfg['crop_size'], normalize=True,
-                            flip=flip, rotate=rotate),
-        batch_size=batch_size, num_workers=num_workers, drop_last=False)
-
-    return dataloader
+    return DataLoader(
+        GridWSIPatchDataset(
+            args.wsi_path,
+            args.mask_path,
+            image_size=cfg['image_size'],
+            patch_size=cfg['patch_size'],
+            crop_size=cfg['crop_size'],
+            normalize=True,
+            flip=flip,
+            rotate=rotate,
+        ),
+        batch_size=batch_size,
+        num_workers=num_workers,
+        drop_last=False,
+    )
 
 
 def run(args):
@@ -94,8 +97,9 @@ def run(args):
         cfg = json.load(f)
 
     if cfg['image_size'] % cfg['patch_size'] != 0:
-            raise Exception('Image size / patch size != 0 : {} / {}'.
-                            format(cfg['image_size'], cfg['patch_size']))
+        raise Exception(
+            f"Image size / patch size != 0 : {cfg['image_size']} / {cfg['patch_size']}"
+        )
 
     patch_per_side = cfg['image_size'] // cfg['patch_size']
     grid_size = patch_per_side * patch_per_side

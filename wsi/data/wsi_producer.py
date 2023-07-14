@@ -45,8 +45,9 @@ class GridWSIPatchDataset(Dataset):
         self._idcs_num = len(self._X_idcs)
 
         if self._image_size % self._patch_size != 0:
-            raise Exception('Image size / patch size != 0 : {} / {}'.
-                            format(self._image_size, self._patch_size))
+            raise Exception(
+                f'Image size / patch size != 0 : {self._image_size} / {self._patch_size}'
+            )
         self._patch_per_side = self._image_size // self._patch_size
         self._grid_size = self._patch_per_side * self._patch_per_side
 

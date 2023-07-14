@@ -25,8 +25,9 @@ class GridImageDataset(Dataset):
 
     def _preprocess(self):
         if self._img_size % self._patch_size != 0:
-            raise Exception('Image size / patch size != 0 : {} / {}'.
-                            format(self._img_size, self._patch_size))
+            raise Exception(
+                f'Image size / patch size != 0 : {self._img_size} / {self._patch_size}'
+            )
 
         self._patch_per_side = self._img_size // self._patch_size
         self._grid_size = self._patch_per_side * self._patch_per_side
@@ -36,19 +37,17 @@ class GridImageDataset(Dataset):
 
         self._annotations = {}
         for pid in self._pids:
-            pid_json_path = os.path.join(self._json_path, pid + '.json')
+            pid_json_path = os.path.join(self._json_path, f'{pid}.json')
             anno = Annotation()
             anno.from_json(pid_json_path)
             self._annotations[pid] = anno
 
         self._coords = []
-        f = open(os.path.join(self._data_path, 'list.txt'))
-        for line in f:
-            pid, x_center, y_center = line.strip('\n').split(',')[0:3]
-            x_center, y_center = int(x_center), int(y_center)
-            self._coords.append((pid, x_center, y_center))
-        f.close()
-
+        with open(os.path.join(self._data_path, 'list.txt')) as f:
+            for line in f:
+                pid, x_center, y_center = line.strip('\n').split(',')[:3]
+                x_center, y_center = int(x_center), int(y_center)
+                self._coords.append((pid, x_center, y_center))
         self._num_image = len(self._coords)
 
     def __len__(self):
@@ -67,14 +66,10 @@ class GridImageDataset(Dataset):
                 x = x_top_left + int((x_idx + 0.5) * self._patch_size)
                 y = y_top_left + int((y_idx + 0.5) * self._patch_size)
 
-                if self._annotations[pid].inside_polygons((x, y), True):
-                    label = 1
-                else:
-                    label = 0
-
+                label = 1 if self._annotations[pid].inside_polygons((x, y), True) else 0
                 label_grid[y_idx, x_idx] = label
 
-        img = Image.open(os.path.join(self._data_path, '{}.png'.format(idx)))
+        img = Image.open(os.path.join(self._data_path, f'{idx}.png'))
 
         img = self._color_jitter(img)
 

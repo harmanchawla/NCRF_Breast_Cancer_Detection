@@ -13,7 +13,7 @@ from torch.optim import SGD
 
 from tensorboardX import SummaryWriter
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
 
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
@@ -39,15 +39,14 @@ def train_epoch(summary, summary_writer, cfg, model, loss_fn, optimizer,
     model.train()
 
     steps = len(dataloader_tumor)
-    if steps > len(dataloader_normal):
-        steps = len(dataloader_normal)
+    steps = min(steps, len(dataloader_normal))
     batch_size = dataloader_tumor.batch_size
     grid_size = dataloader_tumor.dataset._grid_size
     dataiter_tumor = iter(dataloader_tumor)
     dataiter_normal = iter(dataloader_normal)
 
     time_now = time.time()
-    for step in range(steps):
+    for _ in range(steps):
         data_tumor, target_tumor = next(dataiter_tumor)
         data_tumor = Variable(data_tumor.cuda(async=True))
         # data_tumor = Variable(data_tumor)
@@ -112,7 +111,7 @@ def valid_epoch(summary, cfg, model, loss_fn,
 
     loss_sum = 0
     acc_sum = 0
-    for step in range(steps):
+    for _ in range(steps):
         data_tumor, target_tumor = next(dataiter_tumor)
         data_tumor = Variable(data_tumor.cuda(async=True), volatile=True)
         target_tumor = Variable(target_tumor.cuda(async=True))
@@ -159,8 +158,9 @@ def run(args):
     num_workers = args.num_workers * num_GPU
 
     if cfg['image_size'] % cfg['patch_size'] != 0:
-            raise Exception('Image size / patch size != 0 : {} / {}'.
-                            format(cfg['image_size'], cfg['patch_size']))
+        raise Exception(
+            f"Image size / patch size != 0 : {cfg['image_size']} / {cfg['patch_size']}"
+        )
 
     patch_per_side = cfg['image_size'] // cfg['patch_size']
     grid_size = patch_per_side * patch_per_side
@@ -208,7 +208,7 @@ def run(args):
     summary_valid = {'loss': float('inf'), 'acc': 0}
     summary_writer = SummaryWriter(args.save_path)
     loss_valid_best = float('inf')
-    for epoch in range(cfg['epoch']):
+    for _ in range(cfg['epoch']):
         summary_train = train_epoch(summary_train, summary_writer, cfg, model,
                                     loss_fn, optimizer,
                                     dataloader_tumor_train,

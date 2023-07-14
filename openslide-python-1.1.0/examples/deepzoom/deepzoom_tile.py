@@ -93,7 +93,7 @@ class DeepZoomImageTiler(object):
 
     def _write_tiles(self):
         for level in range(self._dz.level_count):
-            tiledir = os.path.join("%s_files" % self._basename, str(level))
+            tiledir = os.path.join(f"{self._basename}_files", str(level))
             if not os.path.exists(tiledir):
                 os.makedirs(tiledir)
             cols, rows = self._dz.level_tiles[level]
@@ -113,11 +113,11 @@ class DeepZoomImageTiler(object):
             print("Tiling %s: wrote %d/%d tiles" % (
                     self._associated or 'slide', count, total),
                     end='\r', file=sys.stderr)
-            if count == total:
-                print(file=sys.stderr)
+        if count == total:
+            print(file=sys.stderr)
 
     def _write_dzi(self):
-        with open('%s.dzi' % self._basename, 'w') as fh:
+        with open(f'{self._basename}.dzi', 'w') as fh:
             fh.write(self.get_dzi())
 
     def get_dzi(self):
@@ -174,19 +174,15 @@ class DeepZoomStaticTiler(object):
         self._dzi_data[self._url_for(associated)] = tiler.get_dzi()
 
     def _url_for(self, associated):
-        if associated is None:
-            base = VIEWER_SLIDE_NAME
-        else:
-            base = self._slugify(associated)
-        return '%s.dzi' % base
+        base = VIEWER_SLIDE_NAME if associated is None else self._slugify(associated)
+        return f'{base}.dzi'
 
     def _write_html(self):
         import jinja2
         env = jinja2.Environment(loader=jinja2.PackageLoader(__name__),
                     autoescape=True)
         template = env.get_template('slide-multipane.html')
-        associated_urls = dict((n, self._url_for(n))
-                    for n in self._slide.associated_images)
+        associated_urls = {n: self._url_for(n) for n in self._slide.associated_images}
         try:
             mpp_x = self._slide.properties[openslide.PROPERTY_NAME_MPP_X]
             mpp_y = self._slide.properties[openslide.PROPERTY_NAME_MPP_Y]

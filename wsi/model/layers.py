@@ -19,7 +19,7 @@ class CRF(nn.Module):
         pairwise_potential = pairwise_sim * W_sym
         unary_potential = logits.clone()
 
-        for i in range(self.iteration):
+        for _ in range(self.iteration):
             probs = torch.transpose(logits.sigmoid(), 1, 2)
             pairwise_potential_E = torch.sum(
                 probs * pairwise_potential - (1 - probs) * pairwise_potential,
@@ -29,6 +29,4 @@ class CRF(nn.Module):
         return logits
 
     def __repr__(self):
-        return 'CRF(num_nodes={}, iteration={})'.format(
-            self.num_nodes, self.iteration
-        )
+        return f'CRF(num_nodes={self.num_nodes}, iteration={self.iteration})'
