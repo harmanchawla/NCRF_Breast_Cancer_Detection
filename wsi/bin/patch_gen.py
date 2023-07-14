@@ -8,7 +8,7 @@ from multiprocessing import Pool, Value, Lock
 
 import openslide
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
 
 parser = argparse.ArgumentParser(description='Generate patches from a given '
                                  'list of coordinates')
@@ -33,13 +33,13 @@ def process(opts):
     i, pid, x_center, y_center, args = opts
     x = int(int(x_center) - args.patch_size / 2)
     y = int(int(y_center) - args.patch_size / 2)
-    wsi_path = os.path.join(args.wsi_path, pid + '.tif')
+    wsi_path = os.path.join(args.wsi_path, f'{pid}.tif')
     slide = openslide.OpenSlide(wsi_path)
     img = slide.read_region(
         (x, y), args.level,
         (args.patch_size, args.patch_size)).convert('RGB')
 
-    img.save(os.path.join(args.patch_path, str(i) + '.png'))
+    img.save(os.path.join(args.patch_path, f'{str(i)}.png'))
 
     global lock
     global count
@@ -47,9 +47,9 @@ def process(opts):
     with lock:
         count.value += 1
         if (count.value) % 100 == 0:
-            logging.info('{}, {} patches generated...'
-                         .format(time.strftime("%Y-%m-%d %H:%M:%S"),
-                                 count.value))
+            logging.info(
+                f'{time.strftime("%Y-%m-%d %H:%M:%S")}, {count.value} patches generated...'
+            )
 
 
 def run(args):
@@ -61,12 +61,10 @@ def run(args):
     copyfile(args.coords_path, os.path.join(args.patch_path, 'list.txt'))
 
     opts_list = []
-    infile = open(args.coords_path)
-    for i, line in enumerate(infile):
-        pid, x_center, y_center = line.strip('\n').split(',')
-        opts_list.append((i, pid, x_center, y_center, args))
-    infile.close()
-
+    with open(args.coords_path) as infile:
+        for i, line in enumerate(infile):
+            pid, x_center, y_center = line.strip('\n').split(',')
+            opts_list.append((i, pid, x_center, y_center, args))
     pool = Pool(processes=args.num_process)
     pool.map(process, opts_list)
 

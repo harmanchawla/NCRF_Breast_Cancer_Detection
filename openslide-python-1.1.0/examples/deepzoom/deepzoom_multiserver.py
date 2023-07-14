@@ -108,7 +108,7 @@ def _setup():
         'DEEPZOOM_OVERLAP': 'overlap',
         'DEEPZOOM_LIMIT_BOUNDS': 'limit_bounds',
     }
-    opts = dict((v, app.config[k]) for k, v in config_map.items())
+    opts = {v: app.config[k] for k, v in config_map.items()}
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
 
 
@@ -153,7 +153,7 @@ def dzi(path):
 def tile(path, level, col, row, format):
     slide = _get_slide(path)
     format = format.lower()
-    if format != 'jpeg' and format != 'png':
+    if format not in ['jpeg', 'png']:
         # Not supported by Deep Zoom
         abort(404)
     try:
@@ -164,7 +164,7 @@ def tile(path, level, col, row, format):
     buf = PILBytesIO()
     tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
     resp = make_response(buf.getvalue())
-    resp.mimetype = 'image/%s' % format
+    resp.mimetype = f'image/{format}'
     return resp
 
 

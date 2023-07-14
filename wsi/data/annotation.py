@@ -57,11 +57,7 @@ class Annotation(object):
         else:
             polygons = copy.deepcopy(self._polygons_negative)
 
-        for polygon in polygons:
-            if polygon.inside(coord):
-                return True
-
-        return False
+        return any(polygon.inside(coord) for polygon in polygons)
 
     def polygon_vertices(self, is_positive):
         if is_positive:
@@ -71,24 +67,21 @@ class Annotation(object):
 
 
 class Formatter(object):
-    def camelyon16xml2json(inxml, outjson):
-        root = ET.parse(inxml).getroot()
+    def camelyon16xml2json(self, outjson):
+        root = ET.parse(self).getroot()
         annotations_tumor = \
-            root.findall('./Annotations/Annotation[@PartOfGroup="Tumor"]')
+                root.findall('./Annotations/Annotation[@PartOfGroup="Tumor"]')
         annotations_0 = \
-            root.findall('./Annotations/Annotation[@PartOfGroup="_0"]')
+                root.findall('./Annotations/Annotation[@PartOfGroup="_0"]')
         annotations_1 = \
-            root.findall('./Annotations/Annotation[@PartOfGroup="_1"]')
+                root.findall('./Annotations/Annotation[@PartOfGroup="_1"]')
         annotations_2 = \
-            root.findall('./Annotations/Annotation[@PartOfGroup="_2"]')
+                root.findall('./Annotations/Annotation[@PartOfGroup="_2"]')
         annotations_positive = \
-            annotations_tumor + annotations_0 + annotations_1
+                annotations_tumor + annotations_0 + annotations_1
         annotations_negative = annotations_2
 
-        json_dict = {}
-        json_dict['positive'] = []
-        json_dict['negative'] = []
-
+        json_dict = {'positive': [], 'negative': []}
         for annotation in annotations_positive:
             X = list(map(lambda x: float(x.get('X')),
                      annotation.findall('./Coordinates/Coordinate')))
@@ -110,20 +103,17 @@ class Formatter(object):
         with open(outjson, 'w') as f:
             json.dump(json_dict, f, indent=1)
 
-    def vertices2json(outjson, positive_vertices=[], negative_vertices=[]):
-        json_dict = {}
-        json_dict['positive'] = []
-        json_dict['negative'] = []
-
+    def vertices2json(self, positive_vertices=[], negative_vertices=[]):
+        json_dict = {'positive': [], 'negative': []}
         for i in range(len(positive_vertices)):
-            name = 'Annotation {}'.format(i)
+            name = f'Annotation {i}'
             vertices = positive_vertices[i].astype(int).tolist()
             json_dict['positive'].append({'name': name, 'vertices': vertices})
 
         for i in range(len(negative_vertices)):
-            name = 'Annotation {}'.format(i)
+            name = f'Annotation {i}'
             vertices = negative_vertices[i].astype(int).tolist()
             json_dict['negative'].append({'name': name, 'vertices': vertices})
 
-        with open(outjson, 'w') as f:
+        with open(self, 'w') as f:
             json.dump(json_dict, f, indent=1)

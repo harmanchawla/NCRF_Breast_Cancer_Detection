@@ -266,10 +266,7 @@ class ImageSlide(AbstractSlide):
 
         file can be a filename or a PIL.Image."""
         AbstractSlide.__init__(self)
-        if isinstance(file, Image.Image):
-            self._image = file
-        else:
-            self._image = Image.open(file)
+        self._image = file if isinstance(file, Image.Image) else Image.open(file)
 
     @classmethod
     def detect_format(cls, filename):
@@ -332,7 +329,7 @@ class ImageSlide(AbstractSlide):
         if level != 0:
             raise OpenSlideError("Invalid level")
         if ['fail' for s in size if s < 0]:
-            raise OpenSlideError("Size %s must be non-negative" % (size,))
+            raise OpenSlideError(f"Size {size} must be non-negative")
         # Any corner of the requested region may be outside the bounds of
         # the image.  Create a transparent tile of the correct size and
         # paste the valid part of the region into the correct location.

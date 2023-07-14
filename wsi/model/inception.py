@@ -30,24 +30,23 @@ def inception_v3(pretrained=False, progress=True, **kwargs):
         transform_input (bool): If True, preprocesses the input according to the method with which it
             was trained on ImageNet. Default: *False*
     """
-    if pretrained:
-        if 'transform_input' not in kwargs:
-            kwargs['transform_input'] = True
-        if 'aux_logits' in kwargs:
-            original_aux_logits = kwargs['aux_logits']
-            kwargs['aux_logits'] = True
-        else:
-            original_aux_logits = True
-        model = Inception3(**kwargs)
-        state_dict = load_state_dict_from_url(model_urls['inception_v3_google'],
-                                              progress=progress)
-        model.load_state_dict(state_dict)
-        if not original_aux_logits:
-            model.aux_logits = False
-            del model.AuxLogits
-        return model
-
-    return Inception3(**kwargs)
+    if not pretrained:
+        return Inception3(**kwargs)
+    if 'transform_input' not in kwargs:
+        kwargs['transform_input'] = True
+    if 'aux_logits' in kwargs:
+        original_aux_logits = kwargs['aux_logits']
+        kwargs['aux_logits'] = True
+    else:
+        original_aux_logits = True
+    model = Inception3(**kwargs)
+    state_dict = load_state_dict_from_url(model_urls['inception_v3_google'],
+                                          progress=progress)
+    model.load_state_dict(state_dict)
+    if not original_aux_logits:
+        model.aux_logits = False
+        del model.AuxLogits
+    return model
 
 
 class Inception3(nn.Module):
@@ -77,7 +76,7 @@ class Inception3(nn.Module):
         self.fc = nn.Linear(2048, num_classes)
 
         for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
                 import scipy.stats as stats
                 stddev = m.stddev if hasattr(m, 'stddev') else 0.1
                 X = stats.truncnorm(-2, 2, scale=stddev)
@@ -144,9 +143,7 @@ class Inception3(nn.Module):
         # N x 2048
         x = self.fc(x)
         # N x 1000 (num_classes)
-        if self.training and self.aux_logits:
-            return _InceptionOuputs(x, aux)
-        return x
+        return _InceptionOuputs(x, aux) if self.training and self.aux_logits else x
 
 
 class InceptionA(nn.Module):

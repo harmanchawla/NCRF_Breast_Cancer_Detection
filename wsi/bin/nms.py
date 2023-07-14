@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 from skimage import filters
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
 
 
 parser = argparse.ArgumentParser(description='Generate predicted coordinates'
@@ -36,25 +36,23 @@ def run(args):
     if args.sigma > 0:
         probs_map = filters.gaussian(probs_map, sigma=args.sigma)
 
-    outfile = open(args.coord_path, 'w')
-    while np.max(probs_map) > args.prob_thred:
-        prob_max = probs_map.max()
-        max_idx = np.where(probs_map == prob_max)
-        x_mask, y_mask = max_idx[0][0], max_idx[1][0]
-        x_wsi = int((x_mask + 0.5) * resolution)
-        y_wsi = int((y_mask + 0.5) * resolution)
-        outfile.write('{:0.5f},{},{}'.format(prob_max, x_wsi, y_wsi) + '\n')
+    with open(args.coord_path, 'w') as outfile:
+        while np.max(probs_map) > args.prob_thred:
+            prob_max = probs_map.max()
+            max_idx = np.where(probs_map == prob_max)
+            x_mask, y_mask = max_idx[0][0], max_idx[1][0]
+            x_wsi = int((x_mask + 0.5) * resolution)
+            y_wsi = int((y_mask + 0.5) * resolution)
+            outfile.write('{:0.5f},{},{}'.format(prob_max, x_wsi, y_wsi) + '\n')
 
-        x_min = x_mask - args.radius if x_mask - args.radius > 0 else 0
-        x_max = x_mask + args.radius if x_mask + args.radius <= X else X
-        y_min = y_mask - args.radius if y_mask - args.radius > 0 else 0
-        y_max = y_mask + args.radius if y_mask + args.radius <= Y else Y
+            x_min = max(x_mask - args.radius, 0)
+            x_max = x_mask + args.radius if x_mask + args.radius <= X else X
+            y_min = max(y_mask - args.radius, 0)
+            y_max = y_mask + args.radius if y_mask + args.radius <= Y else Y
 
-        for x in range(x_min, x_max):
-            for y in range(y_min, y_max):
-                probs_map[x, y] = 0
-
-    outfile.close()
+            for x in range(x_min, x_max):
+                for y in range(y_min, y_max):
+                    probs_map[x, y] = 0
 
 
 def main():

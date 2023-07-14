@@ -19,8 +19,8 @@ toy_sample = ['patient_000_node_3.npy', #0, negative
 filename = toy_sample[6]
 '''
 
-tissue_mask = np.load('tissue_mask/' + filename)
-probs_map = np.load('probs_map/' + filename)
+tissue_mask = np.load(f'tissue_mask/{filename}')
+probs_map = np.load(f'probs_map/{filename}')
 
 fig = plt.figure()
 fig1 = fig.add_subplot(1, 2, 1)
